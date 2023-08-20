@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Instructor = require("../Models/Instructor");
 const fetchinstructor = require("../Middleware/fetchinstructor");
-let multer= require('multer')
+let multer = require('multer')
 
 const JWT_secret = "MSS Online Learning Platform instructors"
 
@@ -43,7 +43,7 @@ router.post("/createinstructor", [
     body("field", "Write your specific domain here ").notEmpty(),
 
 
-], async (req, res) => {
+],uploadPdf.single("pdf"), uploadImage.single("image"), async (req, res) => {
     let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -64,12 +64,20 @@ router.post("/createinstructor", [
         //  hashing the password by using bcrypt.js
         const salt = await bcrypt.genSalt(10);
         const secPass = await bcrypt.hash(req.body.password, salt);
+        if (req.file.fieldname === "image") {
+            const photoName = req.file.filename;
+        }
+        if (req.file.fieldname === "pdf") {
+            const pdfName = req.file.filename;
+        }
         instructor = await Instructor.create({
             name: req.body.name,
             email: req.body.email,
             password: secPass,
             phone: req.body.phone,
             field: req.body.field,
+            cv: pdfName,
+            photo: photoName
 
         });
         const data = {
@@ -143,11 +151,12 @@ router.get("/fetchinstructor", fetchinstructor, async (req, res) => {
         res.status(500).send("Internal Server Error occured");
     }
 });
+//Router 3: Get instructor details by Post request"/learning-platform/instructor-auth/fetchspecificinstructor/:id" and providing token.Log in required.
 
-//route to get all instructors 
-router.get("/fetchallinstructors", fetchinstructor, async (req, res) => {
+router.get("/fetchspecificinstructor/:id", fetchinstructor, async (req, res) => {
     try {
-        const instructor = await Instructor.find({}).sort({ date: -1 });
+        let instructorId = req.params.id;
+        const instructor = await Instructor.findOne({ _id: instructorId }).select("-password");
         res.send(instructor);
     }
     catch (error) {
@@ -156,17 +165,8 @@ router.get("/fetchallinstructors", fetchinstructor, async (req, res) => {
     }
 });
 
-//route to getinstructorname
-router.get("/getinstructorname/:id", fetchinstructor, async (req, res) => {
-    try {
-        const instructor = await Instructor.findById(req.params.id)
-        res.send(instructor.name);
-    }
-    catch (error) {
-        console.log(error.message);
-        res.status(500).send("Internal Server Error occured");
-    }
-});
+
+
 
 
 module.exports = router;
