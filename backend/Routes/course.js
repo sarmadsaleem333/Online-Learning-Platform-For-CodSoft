@@ -8,6 +8,9 @@ const fetchinstructor = require("../Middleware/fetchinstructor");
 let multer = require('multer');
 const Course = require("../Models/Course");
 const Lecture = require("../Models/Lecture");
+const Quiz = require("../Models/Quiz");
+const Question = require("../Models/Question");
+const Option = require("../Models/Option");
 
 var videosStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -77,6 +80,53 @@ router.post("/lecturesupload/:id", fetchinstructor, [
     }
 
 });
+
+// Route 3: to upload quizzes in by instructor who is logged in by post request using route "/learning-platform/course/quizupload/:id"
+// here id is of course
+
+router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
+    try {
+        let course = await Course.findById(req.params.id);
+        const questions = req.body.questions;
+        if (questions.length !== 2) {
+            return res.json("You have to add exactly 2 questions");
+        }
+        const newQuiz = await Quiz.create({
+            topic: req.body.topic,
+        });
+
+        for (const questionData of questions) {
+            const newQuestion = await Question.create({
+                text: questionData.text,
+            });
+
+            for (const optionData of questionData.options) {
+                const newOption = await Option.create({
+                    text: optionData.text,
+                    isCorrect:optionData.isCorrect
+                });
+                newQuestion.options.push(newOption);
+            }
+            await newQuestion.save();
+            newQuiz.questions.push(newQuestion);
+        }
+
+        await newQuiz.save();
+        course.quizzes.push(newQuiz);
+        await course.save();
+
+        res.json("Quiz successfully uploaded");
+
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+
+});
+
+
 
 
 
