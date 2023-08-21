@@ -7,8 +7,9 @@ const QuestionSchema = new Schema({
     },
     options: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Option',
+        ref: 'Option', 
+    }],
 });
 
 const Question = mongoose.model("question-learning-platform", QuestionSchema);
-Question.exports = Question;
+module.exports = Question;

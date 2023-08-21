@@ -12,4 +12,4 @@ const QuizSchema = new Schema({
 });
 
 const Quiz = mongoose.model("quiz-learning-platform", QuizSchema);
-Quiz.exports = Quiz;
+module.exports = Quiz;

@@ -11,4 +11,4 @@ const OptionSchema = new Schema({
     },
 });
 const Option = mongoose.model("option-learning-platform", OptionSchema);
-Option.exports = Option;
+module.exports = Option;

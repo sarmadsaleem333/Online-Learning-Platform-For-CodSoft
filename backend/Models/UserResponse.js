@@ -19,7 +19,7 @@ const UserResponseSchema = new Schema({
         },
         selectedOption: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Option', // Reference to the Option model
+            ref: 'Option',
         },
     }],
     submittedAt: {
@@ -33,4 +33,4 @@ const UserResponseSchema = new Schema({
 });
 
 const UserResponse = mongoose.model("user-response-learning-platform", UserResponseSchema);
-UserResponse.exports = UserResponse;
+module.exports = UserResponse;

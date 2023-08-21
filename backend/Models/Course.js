@@ -9,10 +9,19 @@ const CourseSchema = new Schema({
         type: String,
         required: true
     },
-    modules: [{
+    instructor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Module',
-    }]
+        required: true,
+        ref: 'Instructor'
+    },
+    lectures: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lecture',
+    }],
+    quizzes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Quiz',
+    }],
 
 });
 

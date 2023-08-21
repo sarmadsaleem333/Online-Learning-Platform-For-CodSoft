@@ -13,4 +13,4 @@ const LectureSchema = new Schema({
 });
 
 const Lecture = mongoose.model("lecture-learning-platform", LectureSchema);
-Lecture.exports = Lecture;
+module.exports = Lecture;
