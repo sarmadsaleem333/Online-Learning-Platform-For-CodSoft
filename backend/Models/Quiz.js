@@ -10,6 +10,9 @@ const QuizSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question',
     }],
+    totalMarks:{
+        type:Number,
+    }
 });
 const Quiz = mongoose.model("Quiz", QuizSchema);
 module.exports = Quiz;

@@ -14,6 +14,8 @@ const fetchuser = require("../Middleware/fetchuser");
 const User = require("../Models/User");
 const Lecture = require("../Models/Lecture");
 const fetchinstructor = require("../Middleware/fetchinstructor");
+const UserCourse = require("../Models/UserCourse");
+const UserProgress = require("../Models/UserProgress");
 
 
 var videosStorage = multer.diskStorage({
@@ -247,7 +249,18 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
         if (course.enrolledStudents.includes(req.user.id)) {
             return res.json("You are already enrolled in this course");
         }
-        user.myCourses.push(course);
+        const newProgress = await UserProgress.create({
+
+            totalQuizzes: course.quizzes.length,
+            attemptedQuizzes: 0,
+            quizzesMarks: [],
+            percentage: 0,
+        })
+        const newUserCourse = await UserCourse.create({
+            progress: newProgress,
+            course: course,
+        })
+        user.myCourses.push(newUserCourse._id);
         course.enrolledStudents.push(user);
         await user.save();
         await course.save();
@@ -260,7 +273,7 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
     }
 }
 )
-//Route for user to enroll in a specified course :
+//Route for user to get  a specified course :
 
 router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
     try {
@@ -292,7 +305,68 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 }
 )
 
+//Route :for enrolled user to give specific quiz:
+// here id is of quiz 
 
+router.post("/getquiz/:id", fetchuser, async (req, res) => {
+    let quiz = await Quiz.findById(req.params.id)
+        .populate("topic")
+        .populate("totalMarks")
+        .populate({
+            path: 'questions',
+            populate: {
+                path: 'options',
+            }
+        });
+
+    if (!quiz) {
+        return res.json("No quiz found");
+    }
+    let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
+    if (!course) {
+        return res.json("There is no course with this quiz");
+    }
+    if (!(course.enrolledStudents.includes(req.user.id))) {
+        return res.json("You cannot access this quiz since you have not enrolled in this course");
+    }
+    res.json(quiz);
+
+})
+//Route :for enrolled user to give specific quiz:
+// here id is of quiz 
+
+router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
+    let quiz = await Quiz.findById(req.params.id)
+        .populate("topic")
+        .populate("totalMarks")
+        .populate({
+            path: 'questions',
+            populate: {
+                path: 'options',
+            }
+        });
+    if (!quiz) {
+        return res.json("No quiz found");
+    }
+    let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
+    if (!course) {
+        return res.json("There is no course with this quiz");
+    }
+    if (!(course.enrolledStudents.includes(req.user.id))) {
+        return res.json("You cannot access this quiz since you have not enrolled in this course");
+    }
+
+    const answers = req.body.answers; // answers is array of selected options
+    let score = 0;
+    for (const question of quiz.questions) {
+        let selectedOption = answers[question._id];
+        let correctOption = question.options.find(option => option.isCorrect === true);
+        if (correctOption._id.toString() === selectedOption) {
+            score++;
+        }
+    }
+
+})
 
 
 
