@@ -34,5 +34,5 @@ const InstructorSchema = new Schema({
     }
 });
 
-const Instructor = mongoose.model("instructor-learning-platform", InstructorSchema);
+const Instructor = mongoose.model("Instructor", InstructorSchema);
 module.exports = Instructor;

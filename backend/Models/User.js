@@ -22,7 +22,14 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    myCourses:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'Course'
+        }
+    ],
+    
 });
 
-const User = mongoose.model("user-learning-platform", UserSchema);
+const User = mongoose.model("User", UserSchema);
 module.exports = User;

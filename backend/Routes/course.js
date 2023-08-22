@@ -4,14 +4,17 @@ const { validationResult, body } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Instructor = require("../Models/Instructor");
-const fetchinstructor = require("../Middleware/fetchinstructor");
 let multer = require('multer');
 const Course = require("../Models/Course");
-const Lecture = require("../Models/Lecture");
 const Quiz = require("../Models/Quiz");
 const Question = require("../Models/Question");
 const Option = require("../Models/Option");
 const PublishedCourse = require("../Models/PublishedCourse");
+const fetchuser = require("../Middleware/fetchuser");
+const User = require("../Models/User");
+const Lecture = require("../Models/Lecture");
+const fetchinstructor = require("../Middleware/fetchinstructor");
+
 
 var videosStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -38,11 +41,12 @@ router.post("/courseupload", fetchinstructor, [
         const response = errors.array();
         return res.status(400).json(response[0].msg);
     }
+    const instructor = req.instructor.id
     try {
         await Course.create({
             name: req.body.name,
             description: req.body.description,
-            instructor: req.instructor.id
+            instructor: instructor
         });
 
         res.json("Your course has been made successfully, Now uplaod lectures and quizzes to publish it for students")
@@ -89,8 +93,11 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
     try {
         let course = await Course.findById(req.params.id);
         const questions = req.body.questions;
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
         if (questions.length !== 5) {
-            return res.json("You have to add exactly 2 questions");
+            return res.json("You have to add exactly 5 questions");
         }
         const newQuiz = await Quiz.create({
             topic: req.body.topic,
@@ -225,6 +232,65 @@ router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
 
     }
 });
+
+//Now from here the user side of the course is going to start
+
+//Route for user to enroll in a specified course :
+
+router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
+    try {
+        let course = await PublishedCourse.findById(req.params.id);
+        let user = await User.findById(req.user.id);
+        if (!course) {
+            return res.json("No course found");
+        }
+        if (course.enrolledStudents.includes(req.user.id)) {
+            return res.json("You are already enrolled in this course");
+        }
+        user.myCourses.push(course);
+        course.enrolledStudents.push(user);
+        await user.save();
+        await course.save();
+        res.json("Successfully you enrolled to the course")
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+}
+)
+//Route for user to enroll in a specified course :
+
+router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
+    try {
+        const courseId = req.params.id;
+
+        const course = await PublishedCourse.findById(courseId)
+            .populate("lectures")
+            .populate({
+                path: 'quizzes',
+                populate: {
+                    path: 'questions',
+                    populate: {
+                        path: 'options'
+                    }
+                }
+            });
+        if (!course) {
+            return res.json("No course found");
+        }
+        if (!(course.enrolledStudents.includes(req.user.id))) {
+            return res.json("You are not enrolled in this course");
+        }
+        res.json(course)
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+    }
+}
+)
 
 
 

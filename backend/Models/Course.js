@@ -25,5 +25,5 @@ const CourseSchema = new Schema({
 
 });
 
-const Course = mongoose.model("course-learning-platform", CourseSchema);
+const Course = mongoose.model("Course", CourseSchema);
 module.exports = Course;

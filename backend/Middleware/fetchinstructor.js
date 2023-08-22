@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const JWT_secret = "MSS Online Learning Platform instructors"  
+
+const JWT_secret = "MSS Online Learning Platform instructors"
 
 const fetchinstructor = (req, res, next) => {
 

@@ -10,7 +10,6 @@ let multer = require('multer')
 const JWT_secret = "MSS Online Learning Platform instructors"
 
 
-
 // storing images and pdfs in the folder using multer and storing their name in data base
 var pdfStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -20,7 +19,7 @@ var pdfStorage = multer.diskStorage({
         const uniqueSuffix = Date.now();
         cb(null, uniqueSuffix + file.originalname)
     }
-})
+});
 var imageStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "backend/public/images/");
@@ -43,7 +42,7 @@ router.post("/createinstructor", [
     body("field", "Write your specific domain here ").notEmpty(),
 
 
-],uploadPdf.single("pdf"), uploadImage.single("image"), async (req, res) => {
+], uploadPdf.single("pdf"), uploadImage.single("image"), async (req, res) => {
     let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -32,5 +32,5 @@ const UserResponseSchema = new Schema({
     },
 });
 
-const UserResponse = mongoose.model("user-response-learning-platform", UserResponseSchema);
+const UserResponse = mongoose.model("UserResponse", UserResponseSchema);
 module.exports = UserResponse;

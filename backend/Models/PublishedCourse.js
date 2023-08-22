@@ -35,5 +35,5 @@ const PublishedCourseSchema = new Schema({
 
 });
 
-const PublishedCourse = mongoose.model("published-course-learning-platform", PublishedCourseSchema);
+const PublishedCourse = mongoose.model("PublishedCourse", PublishedCourseSchema);
 module.exports = PublishedCourse;
