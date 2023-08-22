@@ -11,6 +11,7 @@ const Lecture = require("../Models/Lecture");
 const Quiz = require("../Models/Quiz");
 const Question = require("../Models/Question");
 const Option = require("../Models/Option");
+const PublishedCourse = require("../Models/PublishedCourse");
 
 var videosStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -88,7 +89,7 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
     try {
         let course = await Course.findById(req.params.id);
         const questions = req.body.questions;
-        if (questions.length !== 2) {
+        if (questions.length !== 5) {
             return res.json("You have to add exactly 2 questions");
         }
         const newQuiz = await Quiz.create({
@@ -103,7 +104,7 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
             for (const optionData of questionData.options) {
                 const newOption = await Option.create({
                     text: optionData.text,
-                    isCorrect:optionData.isCorrect
+                    isCorrect: optionData.isCorrect
                 });
                 newQuestion.options.push(newOption);
             }
@@ -125,6 +126,109 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
     }
 
 });
+// Route 4:  to publish the course for students to study 
+// here id is of the course  
+
+router.post("/publishcourse/:id", fetchinstructor, async (req, res) => {
+    try {
+        let course = await Course.findById(req.params.id);
+        if (!course) {
+            return res.json("No course found");
+        }
+        if (!(course.quizzes.length >= 5 && course.quizzes.length <= 8)) {
+            return res.json("Please upload atleast 5 or maximum 8 quizzes");
+        }
+        if (!(course.lectures.length >= 10 && course.lectures.length <= 15)) {
+            return res.json("Please upload atleast 10 or maximum 15 lectures");
+        }
+        await PublishedCourse.create({
+            name: course.name,
+            description: course.description,
+            instructor: course.instructor,
+            quizzes: course.quizzes,
+            lectures: course.lectures,
+
+        });
+
+        await Course.findByIdAndDelete(req.params.id);
+        res.json("Your course has been published");
+
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+});
+
+
+// Route 5://get  all non published courses of mine  ;
+router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
+    try {
+        let course = await Course.find({ instructor: req.instructor.id });
+        if (!course) {
+            return res.json("No course found");
+        }
+        res.json(course);
+
+
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+});
+// Route 6://get  specific non published courses of mine  ;
+router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res) => {
+    try {
+        let course = await Course.findById(req.params.id);
+        if (!course) {
+            return res.json("No course found");
+        }
+        res.json(course);
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+    }
+});
+// Route 7://get  specific  published courses of mine  ;
+router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res) => {
+    try {
+        let course = await PublishedCourse.findById(req.params.id);
+        if (!course) {
+            return res.json("No course found");
+        }
+        res.json(course);
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+    }
+});
+
+// Route 8://get  all  published courses of mine  ;
+router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
+    try {
+        let course = await PublishedCourse.find({ instructor: req.instructor.id });
+        if (!course) {
+            return res.json("No course found");
+        }
+        res.json(course);
+
+
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+});
+
+
+
+
 
 
 
