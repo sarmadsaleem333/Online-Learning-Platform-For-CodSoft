@@ -309,61 +309,82 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 // here id is of quiz 
 
 router.post("/getquiz/:id", fetchuser, async (req, res) => {
-    let quiz = await Quiz.findById(req.params.id)
-        .populate("topic")
-        .populate("totalMarks")
-        .populate({
-            path: 'questions',
-            populate: {
-                path: 'options',
-            }
-        });
+    try {
+        let quiz = await Quiz.findById(req.params.id)
+            .populate("topic")
+            .populate("totalMarks")
+            .populate({
+                path: 'questions',
+                populate: {
+                    path: 'options',
+                }
+            });
 
-    if (!quiz) {
-        return res.json("No quiz found");
+        if (!quiz) {
+            return res.json("No quiz found");
+        }
+        let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
+        if (!course) {
+            return res.json("There is no course with this quiz");
+        }
+        if (!(course.enrolledStudents.includes(req.user.id))) {
+            return res.json("You cannot access this quiz since you have not enrolled in this course");
+        }
+        res.json(quiz);
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+
     }
-    let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
-    if (!course) {
-        return res.json("There is no course with this quiz");
-    }
-    if (!(course.enrolledStudents.includes(req.user.id))) {
-        return res.json("You cannot access this quiz since you have not enrolled in this course");
-    }
-    res.json(quiz);
 
 })
 //Route :for enrolled user to give specific quiz:
 // here id is of quiz 
 
 router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
-    let quiz = await Quiz.findById(req.params.id)
-        .populate("topic")
-        .populate("totalMarks")
-        .populate({
-            path: 'questions',
-            populate: {
-                path: 'options',
-            }
-        });
-    if (!quiz) {
-        return res.json("No quiz found");
-    }
-    let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
-    if (!course) {
-        return res.json("There is no course with this quiz");
-    }
-    if (!(course.enrolledStudents.includes(req.user.id))) {
-        return res.json("You cannot access this quiz since you have not enrolled in this course");
-    }
-
-    const answers = req.body.answers; // answers is array of selected options
-    let score = 0;
-    for (const question of quiz.questions) {
-        let selectedOption = answers[question._id];
-        let correctOption = question.options.find(option => option.isCorrect === true);
-        if (correctOption._id.toString() === selectedOption) {
-            score++;
+    try {
+        let quiz = await Quiz.findById(req.params.id)
+            .populate("topic")
+            .populate("totalMarks")
+            .populate({
+                path: 'questions',
+                populate: {
+                    path: 'options',
+                }
+            });
+        if (!quiz) {
+            return res.json("No quiz found");
         }
+        let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
+        if (!course) {
+            return res.json("There is no course with this quiz");
+        }
+        if (!(course.enrolledStudents.includes(req.user.id))) {
+            return res.json("You cannot access this quiz since you have not enrolled in this course");
+        }
+
+        const answers = req.body.answers; // answers is array of selected options
+        let score = 0;
+        for (const question of quiz.questions) {
+            let selectedOption = answers[question._id];
+            let correctOption = question.options.find(option => option.isCorrect === true);
+            if (correctOption._id.toString() === selectedOption) {
+                score++;
+            }
+        }
+        let userCourse = await UserCourse.findOne({ course: course._id });
+        let userProgress = await UserProgress.findById(userCourse.progress);
+        userProgress.attemptedQuizzes+= 1;
+        userProgress.percentage=(score/quiz.totalMarks)*100;
+        userProgress.quizzesMarks.push({
+            total: quiz.totalMarks,
+            obtained: score,
+        });
+        await userProgress.save();
+        res.json({ message: `You obtained ${score} out of ${quiz.totalMarks}` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 
 })
