@@ -9,6 +9,9 @@ const QuestionSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Option',
     }],
+    marks: {
+        type: Number
+    }
 });
 
 

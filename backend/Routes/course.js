@@ -16,6 +16,7 @@ const Lecture = require("../Models/Lecture");
 const fetchinstructor = require("../Middleware/fetchinstructor");
 const UserCourse = require("../Models/UserCourse");
 const UserProgress = require("../Models/UserProgress");
+const UserResponse = require("../Models/UserResponse");
 
 
 var videosStorage = multer.diskStorage({
@@ -98,18 +99,25 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
-        if (questions.length !== 5) {
-            return res.json("You have to add exactly 5 questions");
+        if (questions.length < 5) {
+            return res.json("You have to add atleast 5 questions in a quiz ");
+        }
+        for (const question of questions) {
+            if (question.options.length !== 4) {
+                return res.json("There must be exactly 4 options to each question in quiz");
+            }
         }
         const newQuiz = await Quiz.create({
             topic: req.body.topic,
         });
 
+        let totalQuizMarks = 0;
         for (const questionData of questions) {
             const newQuestion = await Question.create({
                 text: questionData.text,
+                marks: questionData.marks
             });
-
+            totalQuizMarks += questionData.marks;
             for (const optionData of questionData.options) {
                 const newOption = await Option.create({
                     text: optionData.text,
@@ -120,18 +128,15 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
             await newQuestion.save();
             newQuiz.questions.push(newQuestion);
         }
-
+        newQuiz.totalMarks = totalQuizMarks;
         await newQuiz.save();
         course.quizzes.push(newQuiz);
         await course.save();
-
         res.json("Quiz successfully uploaded");
-
 
     } catch (error) {
         res.status(400).json("Internal Server Errror Occured");
         console.log("Error: " + error.message);
-
     }
 
 });
@@ -144,12 +149,19 @@ router.post("/publishcourse/:id", fetchinstructor, async (req, res) => {
         if (!course) {
             return res.json("No course found");
         }
-        if (!(course.quizzes.length >= 5 && course.quizzes.length <= 8)) {
-            return res.json("Please upload atleast 5 or maximum 8 quizzes");
+        if (course.quizzes.length < 5) {
+            return res.json("Please upload atleast 5 quizzes");
         }
-        if (!(course.lectures.length >= 10 && course.lectures.length <= 15)) {
-            return res.json("Please upload atleast 10 or maximum 15 lectures");
+        if (course.quizzes.length > 15) {
+            return res.json("You cannot upload more than 15 quizzes");
         }
+        if (course.lectures.length < 12) {
+            return res.json("Please upload atleast 12 lectures");
+        }
+        if (course.lectures.length > 30) {
+            return res.json("You cannot upload more than 30 lectures");
+        }
+
         await PublishedCourse.create({
             name: course.name,
             description: course.description,
@@ -203,7 +215,7 @@ router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res)
     }
 });
 // Route 7://get  specific  published courses of mine  ;
-router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res) => {
+router.get("/specificpublishedcourses/:id", fetchinstructor, async (req, res) => {
     try {
         let course = await PublishedCourse.findById(req.params.id);
         if (!course) {
@@ -218,7 +230,7 @@ router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res)
 });
 
 // Route 8://get  all  published courses of mine  ;
-router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
+router.get("/allpublishedcourses", fetchinstructor, async (req, res) => {
     try {
         let course = await PublishedCourse.find({ instructor: req.instructor.id });
         if (!course) {
@@ -241,6 +253,7 @@ router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
 
 router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
     try {
+        console.log(req.params.id)
         let course = await PublishedCourse.findById(req.params.id);
         let user = await User.findById(req.user.id);
         if (!course) {
@@ -249,13 +262,14 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
         if (course.enrolledStudents.includes(req.user.id)) {
             return res.json("You are already enrolled in this course");
         }
+        const userResponse = await UserResponse.create({});
         const newProgress = await UserProgress.create({
-
             totalQuizzes: course.quizzes.length,
             attemptedQuizzes: 0,
-            quizzesMarks: [],
             percentage: 0,
         })
+        newProgress.quizzesMarks.push(userResponse._id);
+        newProgress.save();
         const newUserCourse = await UserCourse.create({
             progress: newProgress,
             course: course,
@@ -273,6 +287,36 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
     }
 }
 )
+// get all enrolled Courses
+router.get("/getallenrolledcoursesbyuser", fetchuser, async (req, res) => {
+    try {
+
+        const course = await PublishedCourse.find({ enrolledStudents: { $in: [req.user.id] } })
+            .populate("lectures")
+            .populate({
+                path: 'quizzes',
+                populate: {
+                    path: 'questions',
+                    populate: {
+                        path: 'options'
+                    }
+                }
+            });
+        if (!course) {
+            return res.json("No course found");
+        }
+        if (!(course.enrolledStudents.includes(req.user.id))) {
+            return res.json("You are not enrolled in this course");
+        }
+        res.json(course)
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+    }
+}
+)
+
 //Route for user to get  a specified course :
 
 router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
@@ -362,7 +406,7 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         if (!(course.enrolledStudents.includes(req.user.id))) {
             return res.json("You cannot access this quiz since you have not enrolled in this course");
         }
-        if(quiz.isAttempted){
+        if (quiz.isAttempted) {
             return res.json("You have already attempted this quiz.You can't re attempt it");
         }
 
@@ -372,19 +416,27 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
             let selectedOption = answers[question._id];
             let correctOption = question.options.find(option => option.isCorrect === true);
             if (correctOption._id.toString() === selectedOption) {
-                score++;
+                score += question.marks;
             }
+
         }
         let userCourse = await UserCourse.findOne({ course: course._id });
         let userProgress = await UserProgress.findById(userCourse.progress);
         userProgress.attemptedQuizzes += 1;
-        userProgress.percentage = (score / quiz.totalMarks) * 100
+        userProgress.percentage = ((score / quiz.totalMarks) * 100 + userProgress.percentage) / userProgress.attemptedQuizzes;
+        const UserResponse = await UserResponse.create({
+            attemptedQuizzes: [{
+                quiz: quiz,
+                totalMarks: quiz.totalMarks,
+                obtainedMarks: score
+            }]
+        })
         userProgress.quizzesMarks.push({
             total: quiz.totalMarks,
             obtained: score,
         });
         await userProgress.save();
-        quiz.isAttempted=true;
+        quiz.isAttempted = true;
         await quiz.save();
         res.json({ message: `You obtained ${score} out of ${quiz.totalMarks}` });
     } catch (error) {

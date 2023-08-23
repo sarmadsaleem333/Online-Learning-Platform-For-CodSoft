@@ -5,8 +5,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require("../Models/User");
 const fetchuser = require("../Middleware/fetchuser");
+const UserResponse = require("../Models/UserResponse");
+const UserProgress = require("../Models/UserProgress");
 
- const JWT_secret = "MSS Online Learning Platform Users"  
+const JWT_secret = "MSS Online Learning Platform Users"
 
 
 //Route 1:Create a user using Post request"/learning-platform/user-auth/createuser".No login required
@@ -38,12 +40,14 @@ router.post("/createuser", [
         //  hashing the password by using bcrypt.js
         const salt = await bcrypt.genSalt(10);
         const secPass = await bcrypt.hash(req.body.password, salt);
+  
         user = await User.create({
             name: req.body.name,
             email: req.body.email,
             password: secPass,
             phone: req.body.phone,
         });
+      
         const data = {
             user: {
                 id: user.id
@@ -119,7 +123,7 @@ router.get("/fetchuser", fetchuser, async (req, res) => {
 //route to get all users 
 router.get("/fetchallusers", fetchuser, async (req, res) => {
     try {
-        const user = await User.find({}).sort({date:-1});
+        const user = await User.find({}).sort({ date: -1 });
         res.send(user);
     }
     catch (error) {

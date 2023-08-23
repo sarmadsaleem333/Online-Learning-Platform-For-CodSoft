@@ -6,17 +6,14 @@ const QuizSchema = new Schema({
         type: String,
         required: true,
     },
-    isAttempted:{
-        type:Boolean,
-        default:false
-    },
+ 
     questions: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question',
     }],
-    totalMarks:{
-        type:Number,
-    }
+    totalMarks: {
+        type: Number,
+    },
 });
 const Quiz = mongoose.model("Quiz", QuizSchema);
 module.exports = Quiz;

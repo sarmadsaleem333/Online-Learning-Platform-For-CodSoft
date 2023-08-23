@@ -8,14 +8,10 @@ const UserProgressSchema = new Schema({
         type: Number
     },
     quizzesMarks: [{
-        total: {
-            type: Number,
-        },
-        obtained: {
-            type: Number,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserResponse',
     }],
-    percentage:{
+    percentage: {
         type: Number,
     }
 
