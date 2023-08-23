@@ -362,6 +362,9 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         if (!(course.enrolledStudents.includes(req.user.id))) {
             return res.json("You cannot access this quiz since you have not enrolled in this course");
         }
+        if(quiz.isAttempted){
+            return res.json("You have already attempted this quiz.You can't re attempt it");
+        }
 
         const answers = req.body.answers; // answers is array of selected options
         let score = 0;
@@ -374,23 +377,21 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         }
         let userCourse = await UserCourse.findOne({ course: course._id });
         let userProgress = await UserProgress.findById(userCourse.progress);
-        userProgress.attemptedQuizzes+= 1;
-        userProgress.percentage=(score/quiz.totalMarks)*100;
+        userProgress.attemptedQuizzes += 1;
+        userProgress.percentage = (score / quiz.totalMarks) * 100
         userProgress.quizzesMarks.push({
             total: quiz.totalMarks,
             obtained: score,
         });
         await userProgress.save();
+        quiz.isAttempted=true;
+        await quiz.save();
         res.json({ message: `You obtained ${score} out of ${quiz.totalMarks}` });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
-
-})
-
-
-
+});
 
 
 
