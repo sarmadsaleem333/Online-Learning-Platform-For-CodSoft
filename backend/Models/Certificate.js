@@ -1,22 +1,35 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const CertificateSchema = new Schema({
-    course: {
+    course_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'PublishedCourse',
+        ref: 'Course'
     },
-    user: {
+    user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    course: {
+        type: String,
+    },
+    user: {
+        type: String,
+    },
     instructor: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Instructor',
-
+        type: String,
+    },
+    date: {
+        type: Date,
+        default: Date.now
     },
     result: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
+        type: Number,
+    },
+    success: {
+        type: Boolean,
+    },
+    message: {
+        type: String,
     }
 });
 

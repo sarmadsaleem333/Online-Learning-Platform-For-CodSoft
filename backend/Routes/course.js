@@ -17,6 +17,8 @@ const fetchinstructor = require("../Middleware/fetchinstructor");
 const UserCourse = require("../Models/UserCourse");
 const UserProgress = require("../Models/UserProgress");
 const UserResponse = require("../Models/UserResponse");
+const Certificate = require("../Models/Certificate");
+
 
 
 var videosStorage = multer.diskStorage({
@@ -273,6 +275,7 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
         const newUserCourse = await UserCourse.create({
             progress: newProgress,
             course: course,
+            user: req.user.id,
         })
         user.myCourses.push(newUserCourse._id);
         course.enrolledStudents.push(user);
@@ -374,6 +377,18 @@ router.post("/getquiz/:id", fetchuser, async (req, res) => {
         if (!(course.enrolledStudents.includes(req.user.id))) {
             return res.json("You cannot access this quiz since you have not enrolled in this course");
         }
+        //Checking is the quiz already attempted by user or not
+        const isAttempted = await UserResponse.findOne({
+            $and: [
+                { user: req.user.id },
+                { quiz: quiz._id }
+            ]
+        });
+        console.log(isAttempted)
+        if (isAttempted) {
+            return res.json("You have already attempted this quiz.You can't re attempt it");
+        }
+
         res.json(quiz);
 
     } catch (error) {
@@ -387,6 +402,7 @@ router.post("/getquiz/:id", fetchuser, async (req, res) => {
 
 router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
     try {
+        // Populating the quiz 
         let quiz = await Quiz.findById(req.params.id)
             .populate("topic")
             .populate("totalMarks")
@@ -406,11 +422,20 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         if (!(course.enrolledStudents.includes(req.user.id))) {
             return res.json("You cannot access this quiz since you have not enrolled in this course");
         }
-        if (quiz.isAttempted) {
+
+        //Checking is the quiz already attempted by user or not
+        const isAttempted = await UserResponse.findOne({
+            $and: [
+                { user: req.user.id },
+                { quiz: quiz._id }
+            ]
+        });
+
+        if (isAttempted) {
             return res.json("You have already attempted this quiz.You can't re attempt it");
         }
-
-        const answers = req.body.answers; // answers is array of selected options
+        // Attempting quiz is here
+        const answers = req.body.answers; // Answers is array of selected options
         let score = 0;
         for (const question of quiz.questions) {
             let selectedOption = answers[question._id];
@@ -418,33 +443,98 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
             if (correctOption._id.toString() === selectedOption) {
                 score += question.marks;
             }
-
         }
+
+        // Making changes in user progress and response by storing its marks and recording the progress 
         let userCourse = await UserCourse.findOne({ course: course._id });
         let userProgress = await UserProgress.findById(userCourse.progress);
-        userProgress.attemptedQuizzes += 1;
-        userProgress.percentage = ((score / quiz.totalMarks) * 100 + userProgress.percentage) / userProgress.attemptedQuizzes;
-        const UserResponse = await UserResponse.create({
-            attemptedQuizzes: [{
-                quiz: quiz,
-                totalMarks: quiz.totalMarks,
-                obtainedMarks: score
-            }]
-        })
-        userProgress.quizzesMarks.push({
-            total: quiz.totalMarks,
-            obtained: score,
+
+        const userResponse = await UserResponse.create({
+            quiz: quiz,
+            totalMarks: quiz.totalMarks,
+            obtainedMarks: score,
+            percentage: (score / quiz.totalMarks) * 100,
+            user: req.user.id,
         });
+        userProgress.attemptedQuizzes += 1;
+        userProgress.percentage = (userResponse.percentage + userProgress.percentage) / userProgress.attemptedQuizzes;
+        userProgress.quizzesMarks.push(userResponse._id);
         await userProgress.save();
-        quiz.isAttempted = true;
         await quiz.save();
         res.json({ message: `You obtained ${score} out of ${quiz.totalMarks}` });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
 
+// Route to get certifcate or result 
+
+
+router.get("/getcertificate/:id", fetchuser, async (req, res) => {
+    try {
+
+        const courseId = req.params.id;
+        const user = await User.findById(req.user.id);
+
+        const course = await PublishedCourse.findById(courseId)
+            .populate("instructor")
+        if (!course) {
+            return res.json("No course found");
+        }
+        if (!(course.enrolledStudents.includes(req.user.id))) {
+            return res.json("You are not enrolled in this course");
+        }
+        const userCourse = await UserCourse.findOne({
+            $and: [
+                { user: req.user.id },
+                { course: course._id }
+            ]
+        });
+        if (!userCourse) {
+            return res.json("You have not this course");
+        }
+        const userProgress = await UserProgress.findById(userCourse.progress);
+        if (!userProgress) {
+            return res.json("You have no progress related to this course");
+        }
+        if (userProgress.attemptedQuizzes !== userProgress.totalQuizzes) {
+            res.json("Result is not finalized because you have not completed this course")
+        }
+        const checkCertificate = await Certificate.findOne({
+            $and: [
+                { user_id: req.user.id },
+                { course_id: course._id }
+            ]
+        })
+        if (checkCertificate) {
+            return res.json(checkCertificate);
+        }
+        let succesForCourse = false;
+        let messageFor = "Sorry! You have failed the course because of less percentage";
+        if (userProgress.percentage > 40) {
+            succesForCourse: true
+            messageFor: "Congratulations you have succefully passed the course by MSS Course.com"
+        }
+        const certificate = await Certificate.create({
+            user_id: req.user.id,
+            user: user.name,
+            course_id: courseId,
+            course: course.name,
+            instructor: course.instructor.name,
+            result: userProgress.percentage,
+            success: succesForCourse,
+            message: messageFor
+        });
+        res.json(certificate);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+
+
+})
 
 
 
