@@ -5,19 +5,27 @@ import CreateCourse from './components/CreateCourse';
 import MyCourses from './components/MyCourses';
 import Navbar from './components/Navbar';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Alert from './components/Alert';
+import AlertState from './context/alert/alertState';
+import CourseState from './context/course/courseState';
 
 function App() {
   return (
     <>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Courses />} />
-          <Route path="/createcourse" element={<CreateCourse />} />
-          <Route path="/myCourses" element={<MyCourses />} />
-          <Route path="/courseaddition/:id" element={<CourseAddition />} />
-        </Routes>
-      </BrowserRouter>
+      <CourseState>
+        <AlertState>
+          <BrowserRouter>
+            <Navbar />
+            <Alert />
+            <Routes>
+              <Route path="/" element={<Courses />} />
+              <Route path="/createcourse" element={<CreateCourse />} />
+              <Route path="/myCourses" element={<MyCourses />} />
+              <Route path="/courseaddition/:id" element={<CourseAddition />} />
+            </Routes>
+          </BrowserRouter>
+        </AlertState>
+      </CourseState>
     </>
   );
 }
