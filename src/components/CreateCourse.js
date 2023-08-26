@@ -14,6 +14,9 @@ export default function CreateCourse() {
     }
 
     const handleClick = async () => {
+        if(courseCredentials.name==="" ||courseCredentials.description===""){
+            return showAlert("Fill the required fields", "danger");
+        }
         const response = await createCourse(courseCredentials.name, courseCredentials.description);
         setCourseCredentials({name:"",description:""});
         showAlert(response, "success");

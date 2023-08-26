@@ -193,9 +193,6 @@ router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
             return res.json("No course found");
         }
         res.json(course);
-
-
-
     } catch (error) {
         res.status(400).json("Internal Server Errror Occured");
         console.log("Error: " + error.message);
