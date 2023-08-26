@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import courseContext from '../context/course/courseContext';
 import alertContext from '../context/alert/alertContext';
 import { useParams } from 'react-router-dom';
-
+import QuizMake from './QuizMake';
 export default function CourseAddition(props) {
     const closeRef = useRef(null);
+    const closeRef2 = useRef(null);
     const { courseId } = useParams();
     const context = useContext(courseContext);
     const { getSpecificNonPublishedCourse, specificNonPublishedCourse, uploadLecture } = context;
@@ -41,6 +42,22 @@ export default function CourseAddition(props) {
     }
     return (
         <>
+            <div class="modal fade" id="uploadquizModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header my-3">
+                        <h5 class="modal-title">Upload Quiz</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div>
+                        <QuizMake />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" ref={closeRef2} data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" >Upload Quiz</button>
+                    </div>
+                </div>
+            </div>
+            </div>
 
             <div class="modal fade" id="uploadLectureModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">                <div class="modal-dialog">
                 <div class="modal-content">
@@ -72,34 +89,65 @@ export default function CourseAddition(props) {
                         </div >
                         <div className='d-flex justify-content-center my-3'>
                             <div className="btn btn-info mx-3" data-bs-toggle="modal" data-bs-target="#uploadLectureModal" >Upload Lecture</div>
-                            <div className="btn btn-info mx-3">Upload Quiz</div>
+                            <div className="btn btn-info mx-3" data-bs-toggle="modal" data-bs-target="#uploadquizModal">Upload Quiz</div>
                         </div>
-                        <div className='d-flex my-3'>
-                            <h4>Lectures</h4>
-                            {specificNonPublishedCourse.lectures.length === 0 ? (
-                                <p>No lectures uploaded.</p>
-                            ) : (
-                                specificNonPublishedCourse.lectures.map(lecture => (
-                                    <div className="card mb-3 mx-3" style={{ maxWidth: '540px' }} key={lecture._id}>
-                                        <div className="row g-0">
-                                            <div className="col-md-4">
-                                                <video controls width="100%">
-                                                    <source src={`http://localhost:3333/videos/${lecture.content}`} type="video/mp4" />
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            </div>
-                                            <div className="col-md-8">
-                                                <div className="card-body d-flex flex-column h-100">
-                                                    <h5 className="card-title">{lecture.topic}</h5>
-                                                    {/* Other card content */}
+                        <div className="container">
+                            <h4 className="text-center my-3">Lectures</h4>
+                            <div className="row">
+                                {specificNonPublishedCourse.lectures.length === 0 ? (
+                                    <p className="text-center">No lectures uploaded.</p>
+                                ) : (
+                                    specificNonPublishedCourse.lectures.map((lecture) => (
+                                        <div className="col-md-4" key={lecture._id}>
+                                            <div className="card mb-3">
+                                                <div className="row g-0">
+                                                    <div className="col-md-12">
+                                                        <video controls width="100%">
+                                                            <source src={`http://localhost:3333/videos/${lecture.content}`} type="video/mp4" />
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    </div>
+                                                    <div className="col-md-12">
+                                                        <div className="card-body d-flex flex-column h-100">
+                                                            <h5 className="card-title">{lecture.topic}</h5>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
-                            )}
-
+                                    ))
+                                )}
+                            </div>
                         </div>
+                        <div className="container">
+                            <h4 className="text-center my-3">Quizzes</h4>
+                            <div className="row">
+                                {specificNonPublishedCourse.lectures.length === 0 ? (
+                                    <p className="text-center">No lectures uploaded.</p>
+                                ) : (
+                                    specificNonPublishedCourse.lectures.map((lecture) => (
+                                        <div className="col-md-4" key={lecture._id}>
+                                            <div className="card mb-3">
+                                                <div className="row g-0">
+                                                    <div className="col-md-12">
+                                                        <video controls width="100%">
+                                                            <source src={`http://localhost:3333/videos/${lecture.content}`} type="video/mp4" />
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    </div>
+                                                    <div className="col-md-12">
+                                                        <div className="card-body d-flex flex-column h-100">
+                                                            <h5 className="card-title">{lecture.topic}</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
                     </>
             }
 
