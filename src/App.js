@@ -21,7 +21,7 @@ function App() {
               <Route path="/" element={<Courses />} />
               <Route path="/createcourse" element={<CreateCourse />} />
               <Route path="/myCourses" element={<MyCourses />} />
-              <Route path="/courseaddition/:id" element={<CourseAddition />} />
+              <Route path="/courseaddition/:courseId" element={<CourseAddition />} />
             </Routes>
           </BrowserRouter>
         </AlertState>

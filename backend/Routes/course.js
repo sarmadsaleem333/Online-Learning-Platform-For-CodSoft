@@ -202,7 +202,10 @@ router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
 // Route 6://get  specific non published courses of mine  ;
 router.get("/specificnonpublishedcourses/:id", fetchinstructor, async (req, res) => {
     try {
-        let course = await Course.findById(req.params.id);
+        let course = await Course.findById(req.params.id)
+            .populate("lectures")
+            .populate("instructor")
+            .populate("quizzes");
         if (!course) {
             return res.json("No course found");
         }

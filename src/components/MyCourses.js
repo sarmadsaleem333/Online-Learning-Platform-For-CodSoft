@@ -13,14 +13,14 @@ export default function MyCourses() {
     }, [])
     return (
         <div className="row my-3">
-            <h4 >My In Progress Courses</h4>
+            <h4>My In Progress Courses</h4>
             {nonPublishedCourses === null ? (
                 <div>No In Progress Courses</div>
             ) : nonPublishedCourses.length === 0 ? (
                 <div>No In Progress Courses</div>
             ) : (
                 nonPublishedCourses.map((course) => (
-                    <CourseItem key={course.id} course={course} />
+                    <CourseItem key={course._id} course={course} />
                 ))
             )}
         </div>
