@@ -45,15 +45,11 @@ export default function CourseAddition(props) {
             <div class="modal fade" id="uploadquizModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">                <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header my-3">
-                        <h5 class="modal-title">Upload Quiz</h5>
+                        <h5 class="modal-title">Upload Quiz--Toggle the Correct Option</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div>
-                        <QuizMake />
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" ref={closeRef2} data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" >Upload Quiz</button>
+                        <QuizMake courseId={courseId} />
                     </div>
                 </div>
             </div>

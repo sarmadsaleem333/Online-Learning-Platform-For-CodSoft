@@ -57,6 +57,18 @@ const CourseState = (props) => {
         setSpecificNonPublishedCourse(result.data);
     }
 
+    const uploadQuiz = async (id, quizContent) => {
+        const response = await fetch(`${host}/learning-platform/course/quizupload/${id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnN0cnVjdG9yIjp7ImlkIjoiNjRlNGFlZDlmODg4NzQ0N2IyZjJhYzliIn0sImlhdCI6MTY5Mjk4NDMyNn0.NdmoLRSl_tbioVBJp9Y3X3jyLLhO9EbT185_fN8vEoA"
+            },
+            body: JSON.stringify(quizContent)
+        });
+        const json = await response.json();
+        return json;
+    }
 
     const uploadLecture = async (id, formData) => {
         const result = await axios.post(`${host}/learning-platform/course/lecturesupload/${id}`, formData, {
@@ -69,7 +81,7 @@ const CourseState = (props) => {
     }
 
     return (
-        <courseContext.Provider value={{ specificNonPublishedCourse, getSpecificNonPublishedCourse, createCourse, getMyAllNonPublishedCourses, nonPublishedCourses, PublishedCourses, getMyAllPublishedCourses, uploadLecture }} >
+        <courseContext.Provider value={{ uploadQuiz, specificNonPublishedCourse, getSpecificNonPublishedCourse, createCourse, getMyAllNonPublishedCourses, nonPublishedCourses, PublishedCourses, getMyAllPublishedCourses, uploadLecture }} >
             {props.children}
         </courseContext.Provider>
     )

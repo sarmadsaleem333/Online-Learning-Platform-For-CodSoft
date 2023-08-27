@@ -119,6 +119,7 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
                 text: questionData.text,
                 marks: questionData.marks
             });
+            console.log(questionData.marks)
             totalQuizMarks += questionData.marks;
             for (const optionData of questionData.options) {
                 const newOption = await Option.create({
@@ -134,6 +135,7 @@ router.post("/quizupload/:id", fetchinstructor, async (req, res) => {
         await newQuiz.save();
         course.quizzes.push(newQuiz);
         await course.save();
+        console.log(newQuiz)
         res.json("Quiz successfully uploaded");
 
     } catch (error) {
@@ -355,7 +357,7 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 //Route :for enrolled user to give specific quiz:
 // here id is of quiz 
 
-router.post("/getquiz/:id", fetchuser, async (req, res) => {
+router.get("/getquiz/:id", fetchuser, async (req, res) => {
     try {
         let quiz = await Quiz.findById(req.params.id)
             .populate("topic")
@@ -534,8 +536,30 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
     }
 
 
-})
+});
 
+// router.get("/getquizb/:id", fetchinstructor, async (req, res) => {
+//     try {
+//         let quiz = await Quiz.findById(req.params.id)
+//             .populate("topic")
+//             .populate("totalMarks")
+//             .populate({
+//                 path: 'questions',
+//                 populate: {
+//                     path: 'options',
+//                 }
+//             });
 
+//         if (!quiz) {
+//             return res.json("No quiz found");
+//         }
+//         res.json(quiz);
+
+//     } catch (error) {
+//         res.status(500).json({ error: "Internal server error" });
+
+//     }
+
+// })
 
 module.exports = router;
