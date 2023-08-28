@@ -20,7 +20,7 @@ export default function MyCourses() {
                 <div>No In Progress Courses</div>
             ) : (
                 nonPublishedCourses.map((course) => (
-                    <CourseItem key={course._id} course={course} />
+                    <CourseItem key={course._id} course={course} enroll={false} />
                 ))
             )}
         </div>

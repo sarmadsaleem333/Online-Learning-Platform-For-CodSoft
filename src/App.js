@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Alert from './components/Alert';
 import AlertState from './context/alert/alertState';
 import CourseState from './context/course/courseState';
+import CourseStudy from './components/CourseStudy';
+import EnrolledCourses from './components/EnrolledCourses';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
               <Route path="/createcourse" element={<CreateCourse />} />
               <Route path="/myCourses" element={<MyCourses />} />
               <Route path="/courseaddition/:courseId" element={<CourseAddition />} />
+              <Route path="/coursestudy/:courseId" element={<CourseStudy />} />
+              <Route path="/myenrolledcourses" element={<EnrolledCourses />} />
             </Routes>
           </BrowserRouter>
         </AlertState>

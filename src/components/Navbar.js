@@ -22,6 +22,9 @@ export default function Navbar() {
                         <li className="nav-item">
                             <Link className="nav-link active " aria-current="page" to="/createcourse">Create Course</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link active " aria-current="page" to="/myenrolledcourses">Enrolled Courses</Link>
+                        </li>
 
                     </ul>
                     <form className="d-flex">

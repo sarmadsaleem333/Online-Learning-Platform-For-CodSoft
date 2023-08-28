@@ -190,7 +190,8 @@ router.post("/publishcourse/:id", fetchinstructor, async (req, res) => {
 // Route 5://get  all non published courses of mine  ;
 router.get("/allnonpublishedcourses", fetchinstructor, async (req, res) => {
     try {
-        let course = await Course.find({ instructor: req.instructor.id });
+        let course = await Course.find({ instructor: req.instructor.id })
+            .populate("instructor")
         if (!course) {
             return res.json("No course found");
         }
@@ -236,10 +237,26 @@ router.get("/specificpublishedcourses/:id", fetchinstructor, async (req, res) =>
 // Route 8://get  all  published courses of mine  ;
 router.get("/allpublishedcourses", fetchinstructor, async (req, res) => {
     try {
-        let course = await PublishedCourse.find({ instructor: req.instructor.id });
+        let course = await PublishedCourse.find({ instructor: req.instructor.id })
+            .populate("instructor")
         if (!course) {
             return res.json("No course found");
         }
+        res.json(course);
+
+
+
+    } catch (error) {
+        res.status(400).json("Internal Server Errror Occured");
+        console.log("Error: " + error.message);
+
+    }
+});
+// Route 8://get  all  published courses of mine  ;
+router.get("/allpublishedcoursesbyuser", fetchuser, async (req, res) => {
+    try {
+        let course = await PublishedCourse.find({})
+            .populate("instructor")
         res.json(course);
 
 
@@ -295,8 +312,7 @@ router.post("/enrollcourse/:id", fetchuser, async (req, res) => {
 // get all enrolled Courses
 router.get("/getallenrolledcoursesbyuser", fetchuser, async (req, res) => {
     try {
-
-        const course = await PublishedCourse.find({ enrolledStudents: { $in: [req.user.id] } })
+        const courses = await PublishedCourse.find({ enrolledStudents: { $in: [req.user.id] } })
             .populate("lectures")
             .populate({
                 path: 'quizzes',
@@ -307,13 +323,24 @@ router.get("/getallenrolledcoursesbyuser", fetchuser, async (req, res) => {
                     }
                 }
             });
-        if (!course) {
-            return res.json("No course found");
+
+        if (courses.length === 0) {
+            return res.json("No courses found");
         }
-        if (!(course.enrolledStudents.includes(req.user.id))) {
-            return res.json("You are not enrolled in this course");
+
+        let enrolledInAnyCourse = false;
+        for (const course of courses) {
+            if (course.enrolledStudents.includes(req.user.id)) {
+                enrolledInAnyCourse = true;
+                break;
+            }
         }
-        res.json(course)
+
+        if (!enrolledInAnyCourse) {
+            return res.json("You are not enrolled in any course");
+        }
+
+        res.json(courses)
 
     } catch (error) {
         res.status(400).json("Internal Server Errror Occured");
@@ -330,15 +357,17 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 
         const course = await PublishedCourse.findById(courseId)
             .populate("lectures")
-            .populate({
-                path: 'quizzes',
-                populate: {
-                    path: 'questions',
-                    populate: {
-                        path: 'options'
-                    }
-                }
-            });
+            .populate("instructor")
+            // .populate({
+            //     path: 'quizzes',
+            //     populate: {
+            //         path: 'questions',
+            //         populate: {
+            //             path: 'options'
+            //         }
+            //     }
+            // });
+            .populate("quizzes")
         if (!course) {
             return res.json("No course found");
         }
@@ -538,28 +567,19 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
 
 });
 
-// router.get("/getquizb/:id", fetchinstructor, async (req, res) => {
-//     try {
-//         let quiz = await Quiz.findById(req.params.id)
-//             .populate("topic")
-//             .populate("totalMarks")
-//             .populate({
-//                 path: 'questions',
-//                 populate: {
-//                     path: 'options',
-//                 }
-//             });
+router.get("/getallenrolledcourses", fetchuser, async (req, res) => {
+    try {
+        let course = await PublishedCourse.find({ enrolledStudents: { $in: [req.user.id] } })
+        if (!course) {
+            return res.json("No quiz found");
+        }
+        res.json(course);
 
-//         if (!quiz) {
-//             return res.json("No quiz found");
-//         }
-//         res.json(quiz);
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
 
-//     } catch (error) {
-//         res.status(500).json({ error: "Internal server error" });
+    }
 
-//     }
-
-// })
+})
 
 module.exports = router;

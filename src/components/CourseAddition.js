@@ -3,12 +3,14 @@ import courseContext from '../context/course/courseContext';
 import alertContext from '../context/alert/alertContext';
 import { useParams } from 'react-router-dom';
 import QuizMake from './QuizMake';
+import { useNavigate } from 'react-router-dom';
 export default function CourseAddition(props) {
+    const navigate = useNavigate();
     const closeRef = useRef(null);
     const closeRef2 = useRef(null);
     const { courseId } = useParams();
     const context = useContext(courseContext);
-    const { getSpecificNonPublishedCourse, specificNonPublishedCourse, uploadLecture } = context;
+    const { getSpecificNonPublishedCourse, specificNonPublishedCourse, uploadLecture, publishCourse } = context;
     const alertcontext = useContext(alertContext);
     const { showAlert } = alertcontext;
     const [lectureCredentials, setlectureCredentials] = useState({ topic: "", content: "" });
@@ -39,6 +41,11 @@ export default function CourseAddition(props) {
         setlectureCredentials({ topic: "", content: "" });
         showAlert(message, "success");
         closeRef.current.click();
+    }
+
+    const handlePublish = async () => {
+        const response = await publishCourse(courseId);
+        showAlert(response, "success");
     }
     return (
         <>
@@ -86,6 +93,7 @@ export default function CourseAddition(props) {
                         <div className='d-flex justify-content-center my-3'>
                             <div className="btn btn-info mx-3" data-bs-toggle="modal" data-bs-target="#uploadLectureModal" >Upload Lecture</div>
                             <div className="btn btn-info mx-3" data-bs-toggle="modal" data-bs-target="#uploadquizModal">Upload Quiz</div>
+                            <div className="btn btn-info mx-3" onClick={handlePublish}>Publish Course</div>
                         </div>
                         <div className="container">
                             <h4 className="text-center my-3">Lectures</h4>
@@ -118,22 +126,19 @@ export default function CourseAddition(props) {
                         <div className="container">
                             <h4 className="text-center my-3">Quizzes</h4>
                             <div className="row">
-                                {specificNonPublishedCourse.lectures.length === 0 ? (
-                                    <p className="text-center">No lectures uploaded.</p>
+                                {specificNonPublishedCourse.quizzes.length === 0 ? (
+                                    <p className="text-center">No Quizzes uploaded.</p>
                                 ) : (
-                                    specificNonPublishedCourse.lectures.map((lecture) => (
-                                        <div className="col-md-4" key={lecture._id}>
+                                    specificNonPublishedCourse.quizzes.map((quiz) => (
+                                        <div className="col-md-4" key={quiz._id}>
                                             <div className="card mb-3">
                                                 <div className="row g-0">
                                                     <div className="col-md-12">
-                                                        <video controls width="100%">
-                                                            <source src={`http://localhost:3333/videos/${lecture.content}`} type="video/mp4" />
-                                                            Your browser does not support the video tag.
-                                                        </video>
+
                                                     </div>
                                                     <div className="col-md-12">
                                                         <div className="card-body d-flex flex-column h-100">
-                                                            <h5 className="card-title">{lecture.topic}</h5>
+                                                            <h5 className="card-title">{quiz.topic}</h5>
                                                         </div>
                                                     </div>
                                                 </div>
