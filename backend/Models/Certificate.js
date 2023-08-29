@@ -25,8 +25,8 @@ const CertificateSchema = new Schema({
     result: {
         type: Number,
     },
-    success: {
-        type: Boolean,
+    status:{
+        type:String
     },
     message: {
         type: String,

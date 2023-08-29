@@ -389,7 +389,7 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 
 router.get("/getquiz/:id", fetchuser, async (req, res) => {
     try {
-       
+
         let quiz = await Quiz.findById(req.params.id)
             .populate("topic")
             .populate("totalMarks")
@@ -421,7 +421,7 @@ router.get("/getquiz/:id", fetchuser, async (req, res) => {
         //     return res.json( "You have already attempted this quiz.You can't re attempt it" );
         // }
 
-        res.json( quiz);
+        res.json(quiz);
 
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -465,7 +465,7 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         });
 
         if (isAttempted) {
-            return res.json({message:"You have already attempted this quiz.You can't re attempt it"});
+            return res.json({ message: "You have already attempted this quiz.You can't re attempt it" });
         }
         // Attempting quiz is here
         const answers = req.body; // Answers is array of selected options
@@ -512,7 +512,7 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
 
 router.get("/getcertificate/:id", fetchuser, async (req, res) => {
     try {
-
+        let bool = false;
         const courseId = req.params.id;
         const user = await User.findById(req.user.id);
 
@@ -537,9 +537,8 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
         if (!userProgress) {
             return res.json("You have no progress related to this course");
         }
-        if (userProgress.attemptedQuizzes !== userProgress.totalQuizzes) {
-            res.json("Result is not finalized because you have not completed this course")
-        }
+
+
         const checkCertificate = await Certificate.findOne({
             $and: [
                 { user_id: req.user.id },
@@ -549,11 +548,16 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
         if (checkCertificate) {
             return res.json(checkCertificate);
         }
-        let succesForCourse = false;
-        let messageFor = "Sorry! You have failed the course because of less percentage";
+        let mmessage = "Sorry! You have failed the course because of less percentage";
+        let sstatus = "Failed"
         if (userProgress.percentage > 40) {
-            succesForCourse: true
-            messageFor: "Congratulations you have succefully passed the course by MSS Course.com"
+            sstatus = "Passed"
+            mmessage = "Congratulations you have succefully passed the course by MSS Course.com"
+        }
+        if (userProgress.attemptedQuizzes !== userProgress.totalQuizzes) {
+            sstatus = "Course is in progress";
+            mmessage = "Best of luck for on going course";
+
         }
         const certificate = await Certificate.create({
             user_id: req.user.id,
@@ -562,10 +566,11 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
             course: course.name,
             instructor: course.instructor.name,
             result: userProgress.percentage,
-            success: succesForCourse,
-            message: messageFor
+            status: sstatus,
+            message: mmessage
         });
-        res.json(certificate);
+        bool = true;
+        res.json({ certificate, bool, message: "" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });

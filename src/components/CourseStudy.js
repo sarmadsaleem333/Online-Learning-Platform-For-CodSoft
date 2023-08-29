@@ -4,6 +4,7 @@ import alertContext from '../context/alert/alertContext';
 import { useParams } from 'react-router-dom';
 import AttemptQuiz from './AttemptQuiz';
 import { Link } from 'react-router-dom';
+import Progress from './Progress';
 
 export default function CourseStudy() {
     const { courseId } = useParams();
@@ -30,7 +31,7 @@ export default function CourseStudy() {
                     </div>
                     <div className="container">
                         <h4 className="text-center my-3">Lectures</h4>
-                        <Link className='btn-primary btn my-3 text-center' to={`/myprogress/${courseId}`}>My Progress  </Link>
+                    <div className='btn-primary btn my-3 text-center'data-bs-toggle="modal" data-bs-target="#certificate" >My Progress  </div>
 
                         <div className="row">
                             {specifiedCourse.lectures.length === 0 ? (
@@ -85,6 +86,13 @@ export default function CourseStudy() {
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <AttemptQuiz quizId={quiz._id} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal fade" id="certificate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                   <Progress courseId={courseId}/>
                                                 </div>
                                             </div>
                                         </div>
