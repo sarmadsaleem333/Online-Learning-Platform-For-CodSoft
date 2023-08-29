@@ -3,6 +3,7 @@ import courseContext from '../context/course/courseContext';
 import alertContext from '../context/alert/alertContext';
 import { useParams } from 'react-router-dom';
 import AttemptQuiz from './AttemptQuiz';
+import { Link } from 'react-router-dom';
 
 export default function CourseStudy() {
     const { courseId } = useParams();
@@ -29,6 +30,8 @@ export default function CourseStudy() {
                     </div>
                     <div className="container">
                         <h4 className="text-center my-3">Lectures</h4>
+                        <Link className='btn-primary btn my-3 text-center' to={`/myprogress/${courseId}`}>My Progress  </Link>
+
                         <div className="row">
                             {specifiedCourse.lectures.length === 0 ? (
                                 <p className="text-center">No lectures uploaded.</p>
@@ -81,10 +84,6 @@ export default function CourseStudy() {
                                         <div class="modal fade" id={`quiz__${quiz._id}`} tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
                                                     <AttemptQuiz quizId={quiz._id} />
                                                 </div>
                                             </div>

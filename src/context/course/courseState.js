@@ -11,6 +11,7 @@ const CourseState = (props) => {
     const [allPublishedCourses, setallPublishedCourses] = useState(null);
     const [EnrolledCourses, setEnrolledCourses] = useState(null);
     const [specifiedCourse, setSpecifiedCourse] = useState(null);
+    const [quiz, setQuiz] = useState(null);
 
     const createCourse = async (name, description) => {
         const response = await fetch(`${host}/learning-platform/course/courseupload`, {
@@ -139,9 +140,34 @@ const CourseState = (props) => {
         })
         setSpecifiedCourse(result.data);
     }
+    const getQuiz = async (id) => {
+        const response = await fetch(`${host}/learning-platform/course/getquiz/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjRlNGZlNDMzNTY0YzNjZWNjNDdhMzZkIn0sImlhdCI6MTY5MzIxNDY5MH0.JRPHoO1HR0WIgISaxhOKyLsglGn0IiZKPtPuIn4RBbY"
+            },
+        });
+        const json = await response.json();
+        setQuiz(json);
+
+    }
+    const attemptQuiz = async (id, answers) => {
+        const response = await fetch(`${host}/learning-platform/course/attemptquiz/${id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjRlNGZlNDMzNTY0YzNjZWNjNDdhMzZkIn0sImlhdCI6MTY5MzIxNDY5MH0.JRPHoO1HR0WIgISaxhOKyLsglGn0IiZKPtPuIn4RBbY"
+            },
+            body: JSON.stringify(answers)
+
+        });
+        const json = await response.json();
+        return json.message;
+    }
 
     return (
-        <courseContext.Provider value={{ enrollCourse, specifiedCourse, getSpecifiedCourse, getEnrolledCourses, EnrolledCourses, allPublishedCourses, getPublishedCoursesByUser, publishCourse, uploadQuiz, specificNonPublishedCourse, getSpecificNonPublishedCourse, createCourse, getMyAllNonPublishedCourses, nonPublishedCourses, PublishedCourses, getMyAllPublishedCourses, uploadLecture }} >
+        <courseContext.Provider value={{ quiz, getQuiz, attemptQuiz, enrollCourse, specifiedCourse, getSpecifiedCourse, getEnrolledCourses, EnrolledCourses, allPublishedCourses, getPublishedCoursesByUser, publishCourse, uploadQuiz, specificNonPublishedCourse, getSpecificNonPublishedCourse, createCourse, getMyAllNonPublishedCourses, nonPublishedCourses, PublishedCourses, getMyAllPublishedCourses, uploadLecture }} >
             {props.children}
         </courseContext.Provider>
     );

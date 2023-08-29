@@ -353,6 +353,7 @@ router.get("/getallenrolledcoursesbyuser", fetchuser, async (req, res) => {
 
 router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
     try {
+
         const courseId = req.params.id;
 
         const course = await PublishedCourse.findById(courseId)
@@ -388,6 +389,7 @@ router.get("/getcoursebyuser/:id", fetchuser, async (req, res) => {
 
 router.get("/getquiz/:id", fetchuser, async (req, res) => {
     try {
+       
         let quiz = await Quiz.findById(req.params.id)
             .populate("topic")
             .populate("totalMarks")
@@ -415,12 +417,11 @@ router.get("/getquiz/:id", fetchuser, async (req, res) => {
                 { quiz: quiz._id }
             ]
         });
-        console.log(isAttempted)
-        if (isAttempted) {
-            return res.json("You have already attempted this quiz.You can't re attempt it");
-        }
+        // if (isAttempted) {
+        //     return res.json( "You have already attempted this quiz.You can't re attempt it" );
+        // }
 
-        res.json(quiz);
+        res.json( quiz);
 
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -446,6 +447,7 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         if (!quiz) {
             return res.json("No quiz found");
         }
+
         let course = await PublishedCourse.findOne({ quizzes: { $in: [req.params.id] } });
         if (!course) {
             return res.json("There is no course with this quiz");
@@ -463,13 +465,17 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         });
 
         if (isAttempted) {
-            return res.json("You have already attempted this quiz.You can't re attempt it");
+            return res.json({message:"You have already attempted this quiz.You can't re attempt it"});
         }
         // Attempting quiz is here
-        const answers = req.body.answers; // Answers is array of selected options
+        const answers = req.body; // Answers is array of selected options
+
         let score = 0;
         for (const question of quiz.questions) {
             let selectedOption = answers[question._id];
+            if (!selectedOption) {
+                continue;
+            }
             let correctOption = question.options.find(option => option.isCorrect === true);
             if (correctOption._id.toString() === selectedOption) {
                 score += question.marks;
@@ -493,6 +499,7 @@ router.post("/attemptquiz/:id", fetchuser, async (req, res) => {
         await userProgress.save();
         await quiz.save();
         res.json({ message: `You obtained ${score} out of ${quiz.totalMarks}` });
+        console.log(`You obtained ${score} out of ${quiz.totalMarks}`)
 
     } catch (error) {
         console.error(error);
@@ -580,6 +587,7 @@ router.get("/getallenrolledcourses", fetchuser, async (req, res) => {
 
     }
 
-})
+});
+
 
 module.exports = router;

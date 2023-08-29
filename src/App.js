@@ -10,6 +10,7 @@ import AlertState from './context/alert/alertState';
 import CourseState from './context/course/courseState';
 import CourseStudy from './components/CourseStudy';
 import EnrolledCourses from './components/EnrolledCourses';
+import Progress from './components/Progress';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="/courseaddition/:courseId" element={<CourseAddition />} />
               <Route path="/coursestudy/:courseId" element={<CourseStudy />} />
               <Route path="/myenrolledcourses" element={<EnrolledCourses />} />
+              <Route path="/myprogress/:courseId" element={<Progress/>} />
             </Routes>
           </BrowserRouter>
         </AlertState>
