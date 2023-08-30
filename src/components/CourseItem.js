@@ -2,6 +2,7 @@ import React, { useContext, useRef } from 'react'
 import { Link } from 'react-router-dom';
 import alertContext from '../context/alert/alertContext';
 import courseContext from '../context/course/courseContext';
+import jwt_decode from 'jwt-decode';
 export default function CourseItem(props) {
     const { course, enroll, enrolled } = props;
     const closeRef = useRef(null);
@@ -9,6 +10,15 @@ export default function CourseItem(props) {
     const { enrollCourse } = context;
     const alertcontext = useContext(alertContext);
     const { showAlert } = alertcontext;
+    let userRole;
+    const token = localStorage.getItem("token");
+    if (token) {
+        const decodedToken = jwt_decode(token);
+        userRole = decodedToken.instructor ? 'instructor' : 'user';
+    }
+    else {
+        userRole = ""
+    }
     const handleEnroll = async (id) => {
         const response = await enrollCourse(id);
         closeRef.current.click();
@@ -43,10 +53,11 @@ export default function CourseItem(props) {
                                 <h5 className="card-title">{course.name}</h5>
                                 <p className="card-text">{course.description}</p>
                                 <p className="card-text"><small className="text-muted">By {course.instructor.name} </small></p>
-                                {enroll ?
+
+                                { userRole=="user" && enroll ?
                                     <Link className="btn-primary btn" data-bs-toggle="modal" data-bs-target={`#enroll__${course._id}`}>Enroll</Link>
                                     :
-                                    enrolled ?
+                                    userRole=="user" && enrolled ?
                                         <Link className="btn-primary btn" to={`/coursestudy/${course._id}`}>Study</Link>
                                         :
                                         <Link className="btn-primary btn" to={`/courseaddition/${course._id}`}>Add and Publish</Link>}

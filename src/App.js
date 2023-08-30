@@ -10,8 +10,29 @@ import AlertState from './context/alert/alertState';
 import CourseState from './context/course/courseState';
 import CourseStudy from './components/CourseStudy';
 import EnrolledCourses from './components/EnrolledCourses';
+import Signup from './components/SignUp';
+import Login from './components/Login';
+import jwt_decode from 'jwt-decode';
+import { useEffect, useState } from 'react';
 
 function App() {
+ 
+  const [userRole, setUserRole] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('token'));
+
+  useEffect(() => {
+    if (token) {
+      const decodedToken = jwt_decode(token);
+      setUserRole(decodedToken.instructor ? 'instructor' : 'user');
+    } else {
+      setUserRole('');
+    }
+  }, [token]);
+
+
+
+
+
   return (
     <>
       <CourseState>
@@ -21,15 +42,31 @@ function App() {
             <Alert />
             <Routes>
               <Route path="/" element={<Courses />} />
-              <Route path="/createcourse" element={<CreateCourse />} />
-              <Route path="/myCourses" element={<MyCourses />} />
-              <Route path="/courseaddition/:courseId" element={<CourseAddition />} />
-              <Route path="/coursestudy/:courseId" element={<CourseStudy />} />
-              <Route path="/myenrolledcourses" element={<EnrolledCourses />} />
+
+
+              {userRole === "instructor" && (
+                <>
+                  <Route path="/createcourse" element={<CreateCourse />} />
+                  <Route path="/courseaddition/:courseId" element={<CourseAddition />} />
+                  <Route path="/myCourses" element={<MyCourses />} />
+
+                </>
+              )
+              }
+              {userRole === "user" && (
+                <>
+                  <Route path="/myenrolledcourses" element={<EnrolledCourses />} />
+                  <Route path="/coursestudy/:courseId" element={<CourseStudy />} />
+                </>
+
+              )}
+
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </BrowserRouter>
         </AlertState>
-      </CourseState>
+      </CourseState >
     </>
   );
 }

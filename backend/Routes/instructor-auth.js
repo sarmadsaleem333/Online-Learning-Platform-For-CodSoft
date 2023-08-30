@@ -9,29 +9,6 @@ let multer = require('multer')
 
 const JWT_secret = "MSS Online Learning Platform instructors"
 
-
-// storing images and pdfs in the folder using multer and storing their name in data base
-var pdfStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "backend/public/pdfs/");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now();
-        cb(null, uniqueSuffix + file.originalname)
-    }
-});
-var imageStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "backend/public/images/");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now();
-        cb(null, uniqueSuffix + file.originalname)
-    }
-});
-
-const uploadPdf = multer({ storage: pdfStorage })
-const uploadImage = multer({ storage: imageStorage })
 //Route 1:Create a instructor using Post request"/learning-platform/instructor-auth/createinstructor".No login required
 
 router.post("/createinstructor", [
@@ -42,7 +19,7 @@ router.post("/createinstructor", [
     body("field", "Write your specific domain here ").notEmpty(),
 
 
-], uploadPdf.single("pdf"), uploadImage.single("image"), async (req, res) => {
+], async (req, res) => {
     let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -63,20 +40,14 @@ router.post("/createinstructor", [
         //  hashing the password by using bcrypt.js
         const salt = await bcrypt.genSalt(10);
         const secPass = await bcrypt.hash(req.body.password, salt);
-        if (req.file.fieldname === "image") {
-            const photoName = req.file.filename;
-        }
-        if (req.file.fieldname === "pdf") {
-            const pdfName = req.file.filename;
-        }
+     
         instructor = await Instructor.create({
             name: req.body.name,
             email: req.body.email,
             password: secPass,
             phone: req.body.phone,
             field: req.body.field,
-            cv: pdfName,
-            photo: photoName
+         
 
         });
         const data = {

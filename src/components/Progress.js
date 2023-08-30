@@ -1,30 +1,4 @@
-// import React, { useEffect, useState } from 'react'
-// export default function Progress(props) {
-//     const { courseId } = props;
-//     const [certificate, setCertificate] = useState();
-//     const host = "http://localhost:3333";
-//     const getCertificate = async (id) => {
-//         const response = await fetch(`${host}/learning-platform/course/getcertificate/${id}`, {
-//             method: "GET",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjRlNGZlNDMzNTY0YzNjZWNjNDdhMzZkIn0sImlhdCI6MTY5MzMwNTYyMX0.Qe9FR_gU-74GzZb7fyWS6x-U-xll5Wfl6ABn3Kxv0oE"
-//             },
-//         });
-//         const json = await response.json();
 
-//         setCertificate(json);
-
-//     }
-//     useEffect(() => {
-//         getCertificate(courseId)
-//     }, [courseId])
-
-//     return (
-//         <div> {console.log("ss"+certificate)}</div>
-//     );
-
-// }
 import React, { useEffect, useState } from 'react';
 
 export default function Progress(props) {
@@ -61,7 +35,7 @@ export default function Progress(props) {
                 </div>
                 <div className="card-body">
                     <p className="lead">Dear {certificate.user},</p>
-                    {certificate.status==="Your Course is in progress" ? (
+                    {certificate.status==="Course is in progress" ? (
                         <p>Your Course is in progress</p>
                     ) :  certificate.status==="Failed"? (<p>You have failed the course:</p>):(
                         <p>You have successfully completed the course:</p>

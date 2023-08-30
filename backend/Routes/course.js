@@ -582,6 +582,7 @@ router.get("/getcertificate/:id", fetchuser, async (req, res) => {
 router.get("/getallenrolledcourses", fetchuser, async (req, res) => {
     try {
         let course = await PublishedCourse.find({ enrolledStudents: { $in: [req.user.id] } })
+            .populate("instructor")
         if (!course) {
             return res.json("No quiz found");
         }

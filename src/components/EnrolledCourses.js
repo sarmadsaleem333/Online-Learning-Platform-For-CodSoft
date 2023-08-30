@@ -24,6 +24,7 @@ export default function EnrolledCourses() {
                     <CourseItem key={course._id} course={course} enroll={false} enrolled={true} />
                 ))
             )}
+            
 
         </div>
     )
