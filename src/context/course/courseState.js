@@ -9,7 +9,7 @@ const CourseState = (props) => {
     const [PublishedCourses, setPublishedCourses] = useState(null);
     const [specificNonPublishedCourse, setSpecificNonPublishedCourse] = useState(null);
     const [allPublishedCourses, setallPublishedCourses] = useState(null);
-    const [EnrolledCourses, setEnrolledCourses] = useState(null);
+    const [EnrolledCourses, setEnrolledCourses] = useState([]);
     const [specifiedCourse, setSpecifiedCourse] = useState(null);
     const [quiz, setQuiz] = useState(null);
 

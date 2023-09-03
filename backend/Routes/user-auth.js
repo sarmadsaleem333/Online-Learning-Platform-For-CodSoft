@@ -8,7 +8,7 @@ const fetchuser = require("../Middleware/fetchuser");
 const UserResponse = require("../Models/UserResponse");
 const UserProgress = require("../Models/UserProgress");
 
-const JWT_secret = "MSS Online Learning Platform Users"
+// const JWT_secret = ""  // add your secret here
 
 
 //Route 1:Create a user using Post request"/learning-platform/user-auth/createuser".No login required

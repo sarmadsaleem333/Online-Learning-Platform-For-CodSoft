@@ -46,6 +46,7 @@ export default function CourseItem(props) {
                 </div>
             </div>
             <div className="col-md-3">
+                {console.log(course)}
                 <div className="card mb-3" style={{ maxWidth: '540px' }}>
                     <div className="row g-0">
                         <div className="col-md-8">
@@ -71,14 +72,3 @@ export default function CourseItem(props) {
 
     )
 }
-// {enroll ?
-//     <Link className="btn-primary btn" data-bs-toggle="modal" data-bs-target={`#enroll__${course._id}`}>Enroll</Link>
-//     :
-//     <Link className="btn-primary btn" to={`/courseaddition/${course._id}`}>Add and Publish</Link>
-// }
-// {
-//     !enroll && enrolled ?
-//         <Link className="btn-primary btn" data-bs-toggle="modal" data-bs-target={`#enroll__${course._id}`}>Study</Link>
-
-//         : null
-// }

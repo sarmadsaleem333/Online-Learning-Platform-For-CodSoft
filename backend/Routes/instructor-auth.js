@@ -7,7 +7,7 @@ const Instructor = require("../Models/Instructor");
 const fetchinstructor = require("../Middleware/fetchinstructor");
 let multer = require('multer')
 
-const JWT_secret = "MSS Online Learning Platform instructors"
+// const JWT_secret = ""  // add your secret here
 
 //Route 1:Create a instructor using Post request"/learning-platform/instructor-auth/createinstructor".No login required
 

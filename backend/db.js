@@ -1,5 +1,5 @@
 const mongoose=require ("mongoose");
-const mongoURI="mongodb://127.0.0.1";
+// const mongoURI="";  //add your mongodb string
 const connectToMongo=()=>{
 mongoose.connect(mongoURI)
    .then(()=>{
